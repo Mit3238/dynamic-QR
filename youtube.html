@@ -15,19 +15,31 @@
         background-color: #f0f2f5;
         margin: 0;
         text-align: center;
+        padding: 15px; /* Add padding for smaller screens */
+        box-sizing: border-box;
       }
 
       .container {
         background-color: #fff;
-        padding: 40px;
+        padding: 30px 40px; /* Adjusted padding */
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 500px; /* Limit container width */
+        width: 100%;
+        box-sizing: border-box;
       }
 
       h1 {
         color: #333;
-        margin-bottom: 25px;
+        margin-bottom: 20px; /* Adjusted margin */
         font-weight: 600;
+        font-size: 24px; /* Adjusted font size */
+      }
+
+      p {
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 25px;
       }
 
       #open-youtube-btn {
@@ -40,51 +52,38 @@
         font-weight: 500;
         cursor: pointer;
         transition: background-color 0.2s ease, transform 0.1s ease;
-        display: inline-flex; /* For alignment if adding icon later */
+        display: inline-flex;
         align-items: center;
         justify-content: center;
       }
 
       #open-youtube-btn:hover {
-        background-color: #cc0000; /* Darker Red */
+        background-color: #cc0000;
       }
       #open-youtube-btn:active {
         background-color: #990000;
-        transform: scale(0.98); /* Slight press effect */
+        transform: scale(0.98);
       }
 
       #status-message {
         margin-top: 20px;
         font-size: 14px;
         color: #6c757d;
-        min-height: 20px; /* Reserve space */
+        min-height: 20px;
       }
-
-      /* Optional: Add a YouTube icon (requires Font Awesome or similar) */
-      /*
-         #open-youtube-btn::before {
-            content: '\f167'; // Font Awesome YouTube icon unicode
-            font-family: "Font Awesome 5 Brands"; // Make sure Font Awesome is linked
-            margin-right: 8px;
-            font-size: 18px;
-         }
-         */
     </style>
-    <!-- If using Font Awesome for icon: -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
   </head>
   <body>
     <div class="container">
       <h1>Watch Video</h1>
       <p>
-        Click the button below to open the video in the YouTube app (if
-        available).
+        Click the button below to open the video directly in the YouTube app (if
+        installed).
       </p>
 
       <button id="open-youtube-btn">Open in YouTube App</button>
 
       <p id="status-message"></p>
-      <!-- To show feedback -->
     </div>
 
     <script>
@@ -96,6 +95,10 @@
       // --- Configuration ---
       const videoId = "_1f-o0nqpEI";
       const webVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      // Use the exact working Android Intent provided by the user
+      const androidIntentUrl = `intent://${videoId}/#Intent;scheme=vnd.youtube;package=com.google.android.youtube;S.browser_fallback_url=market://details?id=com.google.android.youtube;end`;
+      // Standard iOS App URL Scheme
+      const iosAppUrl = `youtube://watch?v=${videoId}`;
       const fallbackTimeoutDuration = 2500; // milliseconds (2.5 seconds)
 
       // Function to detect OS
@@ -103,6 +106,7 @@
         if (/android/i.test(userAgent)) {
           return "Android";
         }
+        // More specific iOS check
         if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
           return "iOS";
         }
@@ -120,76 +124,76 @@
 
       // --- Button Click Handler ---
       openButton.addEventListener("click", () => {
-        statusMessage.textContent = "Attempting to open..."; // Provide feedback
+        statusMessage.textContent = "Detecting OS...";
         const detectedOS = getOperatingSystem();
-        let targetAppUrl = null;
-        let isMobile = false;
+        let targetUrl = null; // This will hold the specific URL to use
+        let isMobileAppAttempt = false;
 
         console.log("Detected OS:", detectedOS);
 
         if (detectedOS === "Android") {
-          isMobile = true;
-          // Use the more reliable Android Intent scheme
-          targetAppUrl =
-            "intent://_1f-o0nqpEI/#Intent;scheme=vnd.youtube;package=com.google.android.youtube;S.browser_fallback_url=market://details? id=com.google.android.youtube;end;";
-          console.log("Using Android Intent URL:", targetAppUrl);
+          targetUrl = androidIntentUrl; // Use the working Android Intent
+          isMobileAppAttempt = true;
+          console.log("Using Android Intent URL:", targetUrl);
+          statusMessage.textContent =
+            "Attempting to open via Android Intent...";
         } else if (detectedOS === "iOS") {
-          isMobile = true;
-          // Standard iOS YouTube app scheme
-          targetAppUrl = `youtube://watch?v=${videoId}`;
-          console.log("Using iOS URL Scheme:", targetAppUrl);
+          targetUrl = iosAppUrl; // Use the standard iOS scheme
+          isMobileAppAttempt = true;
+          console.log("Using iOS URL Scheme:", targetUrl);
+          statusMessage.textContent =
+            "Attempting to open via iOS URL Scheme...";
         }
 
         // --- Perform Action ---
-        if (isMobile && targetAppUrl) {
+        if (isMobileAppAttempt) {
           let appOpened = false;
           const visibilityHandler = () => {
-            if (document.visibilityState === "hidden") {
-              appOpened = true;
-              console.log("Visibility changed to hidden, assuming app switch.");
-              statusMessage.textContent = "Opening in app...";
-              // Clean up listener once detected
-              document.removeEventListener(
-                "visibilitychange",
-                visibilityHandler
-              );
-            }
+            // Use requestAnimationFrame to delay the check slightly, sometimes visibility changes instantly
+            requestAnimationFrame(() => {
+              if (document.visibilityState === "hidden") {
+                appOpened = true;
+                console.log(
+                  "Visibility changed to hidden, assuming app switch."
+                );
+                // Don't change status message here, let timeout handle final state or success
+                document.removeEventListener(
+                  "visibilitychange",
+                  visibilityHandler
+                );
+              }
+            });
           };
           document.addEventListener("visibilitychange", visibilityHandler);
 
-          // Attempt to open the app link/intent
-          window.location.href = targetAppUrl;
+          // Attempt to navigate to the app URL (Intent or Scheme)
+          window.location.href = targetUrl;
 
-          // Fallback Timer
+          // Fallback Timer (ESSENTIAL for iOS, secondary for Android)
           setTimeout(() => {
-            document.removeEventListener("visibilitychange", visibilityHandler); // Ensure listener is removed
+            document.removeEventListener("visibilitychange", visibilityHandler); // Clean up listener
             if (!appOpened) {
               console.log(
                 "Fallback: App switch not detected. Redirecting to web URL."
               );
               statusMessage.textContent =
-                "App not found or failed to open. Opening in browser...";
-              window.location.href = webVideoUrl; // Redirect current tab to web version as fallback
+                "App not found or failed. Opening in browser...";
+              window.location.href = webVideoUrl; // Fallback to web version
             } else {
-              console.log(
-                "Fallback: App switch detected. No web redirect needed."
-              );
-              // Optionally clear status after a delay if app opened
-              // setTimeout(() => { statusMessage.textContent = ''; }, 2000);
+              console.log("Fallback: App switch detected. Assuming success.");
+              // Optionally clear status or show success briefly
+              statusMessage.textContent = "Opening in app...";
+              // setTimeout(() => { statusMessage.textContent = ''; }, 3000); // Clear after 3s
             }
           }, fallbackTimeoutDuration);
         } else {
           // --- Desktop or Unknown OS ---
-          console.log(
-            "Not Android/iOS or no specific app URL. Opening web link."
-          );
-          statusMessage.textContent = "Opening video in browser...";
-          // Open the web URL in a new tab for desktop users
-          window.open(webVideoUrl, "_blank");
-          // Clear status after a short delay for desktop
+          console.log("Not Android/iOS. Opening web link in new tab.");
+          statusMessage.textContent = "Opening video in new browser tab...";
+          window.open(webVideoUrl, "_blank"); // Open web URL in a new tab
           setTimeout(() => {
             statusMessage.textContent = "";
-          }, 1500);
+          }, 2000); // Clear status
         }
       });
     </script>
