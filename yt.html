@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open YouTube Video</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+         p.description { /* More specific selector for description */
+             color: #555;
+             line-height: 1.5;
+             margin-bottom: 25px;
+         }
+
+        #open-youtube-btn {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px; /* Add some space above button */
+        }
+
+        #open-youtube-btn:hover {
+            background-color: #cc0000;
+        }
+        #open-youtube-btn:active {
+             background-color: #990000;
+             transform: scale(0.98);
+        }
+
+        #status-message {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6c757d;
+            min-height: 20px; /* Reserve space */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Watch Video</h1>
+        <p class="description">
+            We'll try to open the video in the YouTube app automatically.
+            If it doesn't work, or if you're on a desktop, use the button below.
+        </p>
+
+        <button id="open-youtube-btn">Open in YouTube App</button>
+
+        <p id="status-message"></p> <!-- To show feedback -->
+    </div>
+
+    <script>
+        // --- Configuration & Elements ---
+        const openButton = document.getElementById('open-youtube-btn');
+        const statusMessage = document.getElementById('status-message');
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        const videoId = "_1f-o0nqpEI";
+        const webVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        // Specific Android Intent that works for the user
+        const androidIntentUrl = `intent://${videoId}/#Intent;scheme=vnd.youtube;package=com.google.android.youtube;S.browser_fallback_url=market://details?id=com.google.android.youtube;end`;
+        // Standard iOS App URL Scheme
+        const iosAppUrl = `youtube://watch?v=${videoId}`;
+        const fallbackTimeoutDuration = 2500; // milliseconds
+
+        // --- Helper Functions ---
+        function getOperatingSystem() {
+            if (/android/i.test(userAgent)) return "Android";
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return "iOS";
+            if (/Mac OS X/i.test(userAgent)) return "macOS";
+            if (/Windows/i.test(userAgent)) return "Windows";
+            if (/Linux/i.test(userAgent) && !/android/i.test(userAgent)) return "Linux";
+            return "Unknown";
+        }
+
+        // --- Core Logic to Attempt App Open ---
+        function tryOpenYouTubeApp(source = 'auto') { // source can be 'auto' or 'manual'
+            const detectedOS = getOperatingSystem();
+            let targetUrl = null;
+            let isMobileAppAttempt = false;
+
+            // Clear previous status on new attempt, unless auto-attempt is immediate
+             if (source === 'manual') {
+                 statusMessage.textContent = 'Detecting OS...';
+             }
+
+            console.log(`Attempting YouTube open (source: ${source}). Detected OS: ${detectedOS}`);
+
+            if (detectedOS === "Android") {
+                targetUrl = androidIntentUrl;
+                isMobileAppAttempt = true;
+                statusMessage.textContent = 'Attempting to open via Android Intent...';
+            } else if (detectedOS === "iOS") {
+                targetUrl = iosAppUrl;
+                isMobileAppAttempt = true;
+                statusMessage.textContent = 'Attempting to open via iOS URL Scheme...';
+            }
+
+            if (isMobileAppAttempt) {
+                let appOpened = false;
+                let visibilityHandler; // Declare handler variable
+
+                const cleanup = () => { // Function to remove listener
+                    if (visibilityHandler) {
+                         document.removeEventListener('visibilitychange', visibilityHandler);
+                         visibilityHandler = null; // Prevent multiple removals
+                    }
+                };
+
+                visibilityHandler = () => {
+                    requestAnimationFrame(() => { // Use rAF for timing
+                         if (document.visibilityState === 'hidden') {
+                            appOpened = true;
+                            console.log("Visibility changed to hidden, assuming app switch.");
+                            statusMessage.textContent = 'Opening in app...'; // Update status on success assumption
+                            cleanup(); // Clean up immediately once detected
+                         }
+                    });
+                };
+                document.addEventListener('visibilitychange', visibilityHandler);
+
+                // Attempt to navigate
+                window.location.href = targetUrl;
+
+                // Fallback Timer
+                setTimeout(() => {
+                    cleanup(); // Ensure listener is removed if timeout fires first
+                    if (!appOpened) {
+                        console.log("Fallback: App switch not detected. Redirecting to web URL.");
+                        statusMessage.textContent = 'App not found/failed. Opening in browser...';
+                        window.location.href = webVideoUrl;
+                    } else {
+                         console.log("Fallback Timeout: App switch previously detected. No web redirect.");
+                         // Optionally clear status after perceived success
+                         // setTimeout(() => { statusMessage.textContent = ''; }, 3000);
+                    }
+                }, fallbackTimeoutDuration);
+
+            } else if (source === 'manual') {
+                 // --- Desktop or Unknown OS (Only trigger web open on manual click) ---
+                console.log("Not Android/iOS. Opening web link in new tab.");
+                statusMessage.textContent = 'Opening video in new browser tab...';
+                window.open(webVideoUrl, '_blank');
+                setTimeout(() => { statusMessage.textContent = ''; }, 2000); // Clear status
+            } else {
+                 // --- Desktop or Unknown OS on Auto Load ---
+                 console.log("Not Android/iOS. Automatic attempt skipped.");
+                 statusMessage.textContent = ''; // Clear initial status if any was set
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // 1. Automatic Attempt on Load (Only for Android/iOS)
+        window.addEventListener('load', () => {
+            const os = getOperatingSystem();
+            if (os === "Android" || os === "iOS") {
+                 statusMessage.textContent = 'Attempting to open app automatically...';
+                 // Add a small delay before auto-attempt, sometimes helps reliability
+                 setTimeout(() => {
+                     tryOpenYouTubeApp('auto');
+                 }, 100); // 100ms delay
+            } else {
+                 statusMessage.textContent = ''; // Clear status on non-mobile
+            }
+        });
+
+        // 2. Manual Button Click
+        openButton.addEventListener('click', () => {
+            tryOpenYouTubeApp('manual');
+        });
+
+    </script>
+</body>
+</html>
