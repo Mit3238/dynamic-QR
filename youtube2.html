@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OS Detection & YouTube App Redirect</title>
+    <style>
+      /* CSS rules (same as before) */
+      body {
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f4f4f4;
+        margin: 0;
+        text-align: center;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      #os-name {
+        color: #007bff;
+        font-weight: bold;
+      }
+
+      #redirect-status {
+        margin-top: 15px;
+        color: #28a745;
+        font-weight: bold;
+      }
+
+      #no-redirect-message {
+        margin-top: 15px;
+        color: #6c757d;
+      }
+      #no-redirect-message a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      #no-redirect-message a:hover {
+        text-decoration: underline;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>OS Detection & YouTube Redirect</h1>
+      <p>
+        Your detected Operating System is:
+        <strong id="os-name">Detecting...</strong>
+      </p>
+
+      <p id="redirect-status" class="hidden">
+        Attempting to open the video in the YouTube app...
+      </p>
+
+      <div id="no-redirect-message" class="hidden">
+        <p>
+          Automatic YouTube app redirection is only available for Android and
+          iOS.
+        </p>
+        <p>
+          You can watch the video here:
+          <a id="web-video-link" href="#" target="_blank">Watch on YouTube</a>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      window.onload = function () {
+        const osNameElement = document.getElementById("os-name");
+        const redirectStatusElement =
+          document.getElementById("redirect-status");
+        const noRedirectMessageElement = document.getElementById(
+          "no-redirect-message"
+        );
+        const webVideoLinkElement = document.getElementById("web-video-link");
+        const userAgent =
+          navigator.userAgent || navigator.vendor || window.opera;
+
+        // --- Configuration ---
+        const videoId = "_1f-o0nqpEI";
+        const webVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const fallbackTimeoutDuration = 2500; // Increased timeout (2.5 seconds)
+
+        let detectedOS = "Unknown";
+        let targetAppUrl = null; // URL scheme/intent to try opening the app
+
+        // --- OS Detection & URL Scheme Assignment ---
+        if (/android/i.test(userAgent)) {
+          detectedOS = "Android";
+          // Use the Android Intent scheme for higher reliability
+          // Tries to open the video directly in the YouTube app package
+          // Includes fallback to Play Store if app not installed (handled by Android OS usually)
+          targetAppUrl =
+            "intent://_1f-o0nqpEI/#Intent;scheme=vnd.youtube;package=com.google.android.youtube;S.browser_fallback_url=market://details? id=com.google.android.youtube;end;";
+          // Alternative simpler scheme (less reliable than intent):
+          // targetAppUrl = `vnd.youtube:${videoId}`;
+        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+          detectedOS = "iOS";
+          // Standard iOS YouTube app scheme
+          targetAppUrl = `youtube://watch?v=${videoId}`;
+          // iOS is often good at handling the web URL too, prompting to open in app
+          // The fallback timer will handle cases where youtube:// fails or app isn't installed.
+        } else if (/Mac OS X/i.test(userAgent)) {
+          detectedOS = "macOS";
+        } else if (/Windows/i.test(userAgent)) {
+          detectedOS = "Windows";
+        } else if (/Linux/i.test(userAgent) && !/android/i.test(userAgent)) {
+          detectedOS = "Linux";
+        }
+
+        // Display the detected OS
+        osNameElement.textContent = detectedOS;
+
+        // --- Redirect Logic ---
+        if (detectedOS === "Android" || detectedOS === "iOS") {
+          redirectStatusElement.classList.remove("hidden");
+          console.log(
+            `Attempting ${detectedOS} YouTube app redirect to: ${targetAppUrl}`
+          );
+
+          if (targetAppUrl) {
+            // Track if the page becomes hidden (indicating app switch or tab change)
+            let appOpened = false;
+            const visibilityHandler = () => {
+              if (document.visibilityState === "hidden") {
+                appOpened = true;
+                console.log(
+                  "Browser tab hidden, assuming app switch successful."
+                );
+                // Optional: Remove the listener if you only care about the first switch
+                // document.removeEventListener('visibilitychange', visibilityHandler);
+              }
+            };
+            document.addEventListener("visibilitychange", visibilityHandler);
+
+            // Attempt to open the app link/intent
+            window.location.href = targetAppUrl;
+
+            // Fallback Timer: If the app doesn't open or isn't installed,
+            // redirect to the web URL after a delay.
+            // Check 'appOpened' flag to avoid unnecessary web redirect if app switch was detected.
+            setTimeout(() => {
+              document.removeEventListener(
+                "visibilitychange",
+                visibilityHandler
+              ); // Clean up listener
+              if (!appOpened) {
+                console.log(
+                  `Fallback Timeout: App switch not detected. Redirecting to web URL: ${webVideoUrl}`
+                );
+                window.location.href = webVideoUrl;
+              } else {
+                console.log(
+                  "Fallback Timeout: App switch detected earlier. No web redirect needed."
+                );
+              }
+            }, fallbackTimeoutDuration);
+          } else {
+            redirectStatusElement.textContent =
+              "Error: YouTube redirect URL could not be determined.";
+            redirectStatusElement.style.color = "#dc3545";
+            webVideoLinkElement.href = webVideoUrl;
+            noRedirectMessageElement.classList.remove("hidden");
+          }
+        } else {
+          // Show message and web link for other OSes
+          webVideoLinkElement.href = webVideoUrl;
+          noRedirectMessageElement.classList.remove("hidden");
+        }
+      };
+    </script>
+  </body>
+</html>
