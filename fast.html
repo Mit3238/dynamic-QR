@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Detection & App Redirect</title>
+    <style>
+        /* CSS rules */
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #os-name {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        /* Style for the redirecting message */
+        #redirect-status {
+            margin-top: 15px;
+            color: #28a745; /* Green color for status */
+            font-weight: bold;
+        }
+
+         /* Style for the non-redirect message */
+        #no-redirect-message {
+             margin-top: 15px;
+             color: #6c757d; /* Gray color */
+        }
+
+        /* Class to hide elements initially */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OS Detection</h1>
+        <p>Your detected Operating System is: <strong id="os-name">Detecting...</strong></p>
+
+        <!-- Message shown during redirect attempt -->
+        <p id="redirect-status" class="hidden">Attempting to open the app store...</p>
+
+        <!-- Message for other OSes -->
+        <p id="no-redirect-message" class="hidden">Automatic app store redirection is only available for Android and iOS.</p>
+    </div>
+
+    <script>
+        // JavaScript logic
+        window.onload = function() {
+            const osNameElement = document.getElementById('os-name');
+            const redirectStatusElement = document.getElementById('redirect-status');
+            const noRedirectMessageElement = document.getElementById('no-redirect-message');
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            let detectedOS = "Unknown";
+            let targetUrl = null;
+
+            // --- OS Detection ---
+            if (/android/i.test(userAgent)) {
+                detectedOS = "Android";
+                // IMPORTANT: Replace 'com.example.yourapp' with your actual app package name
+                targetUrl = "market://details?id=com.wehear.wehear";
+                // Fallback link (optional):
+                // targetUrl = "https://play.google.com/store/apps/details?id=com.example.yourapp";
+            } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) { // iOS detection
+                detectedOS = "iOS";
+                // IMPORTANT: Replace '123456789' with your actual app's Apple ID
+                targetUrl = "itms-apps://itunes.apple.com/app/id6463114022";
+                 // Fallback link (optional):
+                // targetUrl = "https://apps.apple.com/app/id123456789";
+            } else if (/Mac OS X/i.test(userAgent)) {
+                detectedOS = "macOS";
+            } else if (/Windows/i.test(userAgent)) {
+                detectedOS = "Windows";
+            } else if (/Linux/i.test(userAgent)) {
+                 // Check for Linux, but make sure it's not Android
+                if (!/android/i.test(userAgent)) {
+                     detectedOS = "Linux";
+                }
+            }
+            // Add more OS checks if needed
+
+            // Display the detected OS
+            osNameElement.textContent = detectedOS;
+
+            // --- Redirect Logic (No Timer) ---
+            if (detectedOS === "Android" || detectedOS === "iOS") {
+                // Show the redirect status message
+                redirectStatusElement.classList.remove('hidden');
+                console.log("Attempting redirect to:", targetUrl);
+
+                // Attempt to redirect immediately
+                if (targetUrl) {
+                    window.location.href = targetUrl;
+                } else {
+                    // Handle case where targetUrl wasn't set correctly (shouldn't happen with current logic)
+                     redirectStatusElement.textContent = "Error: Redirect URL not configured.";
+                     redirectStatusElement.style.color = "#dc3545"; // Make error red
+                }
+
+            } else {
+                // Show message that redirection isn't happening for other OSes
+                noRedirectMessageElement.classList.remove('hidden');
+            }
+        };
+    </script>
+</body>
+</html>
