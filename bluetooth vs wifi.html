@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth vs. WiFi: Interactive Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-button.active { background-color: #06b6d4; color: white; }
+        .tab-button { transition: background-color 0.3s ease; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .timeline-item h4 { cursor: pointer; }
+        .timeline-details { display: none; max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out; }
+        .timeline-details.expanded { max-height: 500px; /* Adjust as needed */ }
+        .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+        .feature-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; }
+        .feature-card h4 { color: #1e293b; }
+        .app-card { cursor: pointer; }
+        .app-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+        .recommendation-button { background-color: #0891b2; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; }
+        .recommendation-button:hover { background-color: #0e7490; }
+        .bg-warm-neutral-bg { background-color: #fdfbf7; } /* Lighter beige/off-white */
+        .text-warm-neutral-text { color: #44403c; } /* Darker stone/brown */
+        .accent-bluetooth { color: #2563eb; } /* Blue */
+        .bg-accent-bluetooth { background-color: #2563eb; }
+        .border-accent-bluetooth { border-color: #2563eb; }
+        .accent-wifi { color: #059669; } /* Emerald Green */
+        .bg-accent-wifi { background-color: #059669; }
+        .border-accent-wifi { border-color: #059669; }
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            color: #4b5563; /* gray-600 */
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-button:hover {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1f2937; /* gray-800 */
+        }
+        .nav-button.active {
+            background-color: #06b6d4; /* cyan-500 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.3), 0 2px 4px -2px rgba(6, 182, 212, 0.3);
+        }
+         .section-intro {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f9fafb; /* gray-50 */
+            border-left: 4px solid #06b6d4; /* cyan-500 */
+            border-radius: 0.25rem;
+        }
+        .section-intro p {
+            color: #374151; /* gray-700 */
+            line-height: 1.6;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            border-radius: 0.5rem;
+        }
+        table {
+            width: 100%;
+            min-width: 600px; /* Ensure table is scrollable on small screens if content is wide */
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        th {
+            background-color: #f9fafb; /* gray-50 */
+            font-weight: 600;
+            color: #374151; /* gray-700 */
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb; /* gray-50 */
+        }
+    </style>
+</head>
+<body class="bg-warm-neutral-bg text-warm-neutral-text min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-cyan-600 mb-2 sm:mb-0">Bluetooth vs. WiFi Analyzer</h1>
+            <nav id="navigation" class="flex flex-wrap justify-center gap-2">
+                <button class="nav-button active" data-tab="overview">Overview</button>
+                <button class="nav-button" data-tab="core-tech">Core Technologies</button>
+                <button class="nav-button" data-tab="performance">Performance</button>
+                <button class="nav-button" data-tab="applications">Applications</button>
+                <button class="nav-button" data-tab="interactive-guide">Which is Better?</button>
+                <button class="nav-button" data-tab="future">Future Outlook</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        <section id="overview" class="content-section active">
+            <div class="section-intro">
+                <p>Welcome to the interactive Bluetooth vs. WiFi Analyzer. This application provides a comprehensive comparison of these two ubiquitous wireless technologies. Explore their core principles, performance metrics, typical applications, and future trends to understand which technology best suits various needs. Use the navigation above to explore different aspects of Bluetooth and WiFi.</p>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4 text-cyan-700">Defining the Landscape</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-2 accent-bluetooth">Bluetooth</h3>
+                    <p class="text-gray-700">Primarily engineered for short-range, direct device-to-device data exchange, Bluetooth fosters Personal Area Networks (PANs). It's optimized for peripherals, wearables, and audio streaming, emphasizing low-power convenience. Its goal is to replace cables for seamless communication.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-2 accent-wifi">WiFi (Wireless Fidelity)</h3>
+                    <p class="text-gray-700">Designed to provide Wireless Local Area Network (WLAN) capabilities, WiFi enables robust network access and high-speed internet connectivity for a multitude of devices. It focuses on high-performance network access for homes, offices, and public spaces.</p>
+                </div>
+            </div>
+            <div class="mt-6 bg-white p-6 rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Why Both Exist</h3>
+                <p class="text-gray-700">The parallel development and sustained relevance of both technologies highlight a fundamental dichotomy in wireless communication needs: the demand for personal-scale, low-power convenience (Bluetooth) versus the necessity for robust, high-performance network access (WiFi). Neither has fully supplanted the other because their core designs are optimized to solve different problems. Understanding their differences is key to making informed technology choices.</p>
+            </div>
+        </section>
+
+        <section id="core-tech" class="content-section">
+            <div class="section-intro">
+                <p>This section delves into the fundamental technologies and standardization frameworks that govern Bluetooth and WiFi. Discover how their distinct operating principles and evolutionary paths have shaped their capabilities. You can explore the evolution of each standard by clicking on the version names in the timelines below.</p>
+            </div>
+            <h2 class="text-2xl font-semibold mb-6 text-cyan-700">Evolution of Standards</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 accent-bluetooth">Bluetooth Evolution</h3>
+                    <p class="mb-4 text-sm text-gray-600">Bluetooth has evolved significantly, focusing on enhancing speed, range, and power efficiency, especially with Bluetooth Low Energy (BLE) for battery-powered devices. Click on a version to see details.</p>
+                    <div id="bluetooth-timeline" class="space-y-4"></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 accent-wifi">WiFi Evolution</h3>
+                     <p class="mb-4 text-sm text-gray-600">WiFi standards have consistently pushed for higher data rates, increased capacity, and better efficiency to meet growing demands for wireless internet access and local networking. Click on a version to see details.</p>
+                    <div id="wifi-timeline" class="space-y-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="performance" class="content-section">
+             <div class="section-intro">
+                <p>Compare Bluetooth and WiFi head-to-head across key performance metrics. This section uses interactive charts and tables to illustrate differences in range, data speed, power consumption, and security features. Understanding these metrics is crucial for selecting the right technology for a specific application.</p>
+            </div>
+            <h2 class="text-2xl font-semibold mb-6 text-cyan-700">Performance Metrics Comparison</h2>
+
+            <div class="mb-8 p-6 bg-white rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Range and Coverage</h3>
+                <p class="text-gray-600 mb-4">Bluetooth is designed for shorter ranges, while WiFi generally offers greater coverage. However, specific versions and environmental factors play a significant role. The chart below shows typical maximum ranges.</p>
+                <div class="chart-container">
+                    <canvas id="rangeChart"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-center">Note: Ranges are theoretical maximums and vary with environment and device class.</p>
+            </div>
+
+            <div class="mb-8 p-6 bg-white rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Data Transfer Rates</h3>
+                <p class="text-gray-600 mb-4">WiFi provides significantly higher data rates suitable for bandwidth-intensive tasks, whereas Bluetooth is optimized for lower data rate applications. The chart illustrates the vast difference in theoretical maximum speeds.</p>
+                <div class="chart-container">
+                    <canvas id="speedChart"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-center">Note: Speeds are theoretical maximums. Actual throughput is typically lower.</p>
+            </div>
+
+            <div class="mb-8 p-6 bg-white rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Power Consumption</h3>
+                <p class="text-gray-600 mb-4">Power efficiency is a key differentiator. Bluetooth, especially BLE, is designed for ultra-low power consumption, making it ideal for battery-operated devices. WiFi is generally more power-hungry.</p>
+                 <div class="chart-container">
+                    <canvas id="powerChart"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-center">Note: Values are indicative and depend on usage patterns and specific implementations.</p>
+            </div>
+            
+            <div class="mb-8 p-6 bg-white rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Security Features</h3>
+                <p class="text-gray-600 mb-4">Both technologies have evolved robust security mechanisms. The table below compares key security aspects of their latest iterations, LE Secure Connections for Bluetooth and WPA3 for WiFi.</p>
+                <div class="table-container">
+                    <table id="securityTable">
+                        <thead>
+                            <tr>
+                                <th>Security Aspect</th>
+                                <th class="accent-bluetooth">Bluetooth (LE Secure Connections)</th>
+                                <th class="accent-wifi">WiFi (WPA3)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="feature-card">
+                    <h4 class="text-lg font-semibold mb-2">Connectivity & Capacity</h4>
+                    <p><strong class="accent-bluetooth">Bluetooth:</strong> Typically connects up to 7 active slave devices per master in a piconet. Suited for personal device clusters.</p>
+                    <p><strong class="accent-wifi">WiFi:</strong> Access Points can theoretically support hundreds of clients, though practical limits are much lower (25-50). Designed for shared network access.</p>
+                </div>
+                 <div class="feature-card">
+                    <h4 class="text-lg font-semibold mb-2">Interference Management</h4>
+                    <p><strong class="accent-bluetooth">Bluetooth:</strong> Uses Frequency Hopping Spread Spectrum (FHSS) and Adaptive Frequency Hopping (AFH) to mitigate interference in the 2.4 GHz band.</p>
+                    <p><strong class="accent-wifi">WiFi:</strong> Uses CSMA/CA, channel planning, and technologies like BSS Coloring (Wi-Fi 6). Increasingly utilizes less congested 5 GHz and 6 GHz bands.</p>
+                </div>
+                <div class="feature-card">
+                    <h4 class="text-lg font-semibold mb-2">Cost & Implementation</h4>
+                    <p><strong class="accent-bluetooth">Bluetooth:</strong> Generally lower IC and module costs. Simpler hardware for BLE. Firmware can be detailed.</p>
+                    <p><strong class="accent-wifi">WiFi:</strong> Higher component costs. Traditionally more complex hardware/firmware, though IoT solutions are simplifying this.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="applications" class="content-section">
+            <div class="section-intro">
+                <p>Explore the primary application domains where Bluetooth and WiFi excel. Their distinct characteristics make them suitable for different tasks, from personal audio streaming to high-speed internet access. Click on an application category to learn more about why a particular technology is favored.</p>
+            </div>
+            <h2 class="text-2xl font-semibold mb-6 text-cyan-700">Application Domains</h2>
+            <div id="applications-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            <div id="application-details" class="mt-6 bg-white p-6 rounded-lg shadow" style="display: none;">
+                <h3 id="app-detail-title" class="text-xl font-semibold mb-2"></h3>
+                <p id="app-detail-tech" class="font-medium mb-1"></p>
+                <p id="app-detail-reason" class="text-gray-700"></p>
+            </div>
+             <div class="mt-8 p-6 bg-white rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Emerging Use Cases & Synergies</h3>
+                <p class="text-gray-700 mb-2">Both technologies continue to evolve. WiFi is finding new roles in sensing (motion, gestures, health monitoring) beyond just connectivity. Many devices integrate both Bluetooth and WiFi, using Bluetooth for setup or low-power tasks and WiFi for high-speed data or internet access, showcasing their complementary nature, especially in IoT gateways.</p>
+            </div>
+        </section>
+
+        <section id="interactive-guide" class="content-section">
+            <div class="section-intro">
+                <p>Not sure which technology is right for your needs? This interactive guide helps you decide. Select your primary requirements from the options below, and we'll suggest whether Bluetooth or WiFi might be a better fit, along with a brief explanation. This tool simplifies the decision-making process based on the report's conclusions.</p>
+            </div>
+            <h2 class="text-2xl font-semibold mb-6 text-cyan-700">Which Technology is Better for You?</h2>
+            <div class="bg-white p-6 rounded-lg shadow max-w-2xl mx-auto">
+                <div class="mb-4">
+                    <label for="power-need" class="block text-sm font-medium text-gray-700 mb-1">Primary Power Consideration:</label>
+                    <select id="power-need" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
+                        <option value="any">No Strong Preference</option>
+                        <option value="low">Ultra-Low Power / Long Battery Life (e.g., wearables)</option>
+                        <option value="moderate">Mains Powered or Large Battery (e.g., laptops, smart speakers)</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="datarate-need" class="block text-sm font-medium text-gray-700 mb-1">Primary Data Speed Requirement:</label>
+                    <select id="datarate-need" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
+                        <option value="any">No Strong Preference</option>
+                        <option value="low">Low Data Rate (e.g., sensor data, audio streaming)</option>
+                        <option value="high">High Data Rate (e.g., video streaming, large files, internet)</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="range-need" class="block text-sm font-medium text-gray-700 mb-1">Primary Range Requirement:</label>
+                    <select id="range-need" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
+                        <option value="any">No Strong Preference</option>
+                        <option value="short">Short Range (e.g., personal area, same room)</option>
+                        <option value="long">Longer Range (e.g., whole house, office)</option>
+                    </select>
+                </div>
+                 <div class="mb-6">
+                    <label for="internet-need" class="block text-sm font-medium text-gray-700 mb-1">Direct Internet Connectivity:</label>
+                    <select id="internet-need" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
+                        <option value="any">Not a deciding factor</option>
+                        <option value="no">Not essential / Can use a gateway</option>
+                        <option value="yes">Essential for the device itself</option>
+                    </select>
+                </div>
+                <button id="getRecommendation" class="w-full recommendation-button">Get Recommendation</button>
+                <div id="recommendationResult" class="mt-6 p-4 border-l-4 rounded bg-gray-50" style="display: none;">
+                    <h4 id="recommendationTitle" class="text-lg font-semibold"></h4>
+                    <p id="recommendationText" class="text-gray-700"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="content-section">
+            <div class="section-intro">
+                <p>Both Bluetooth and WiFi are constantly evolving. This section provides a glimpse into their future directions, including potential enhancements and the ongoing trend of coexistence and synergy. Understanding these future trends can help anticipate how these technologies will continue to shape our connected world.</p>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4 text-cyan-700">The Road Ahead</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-2 accent-bluetooth">Future of Bluetooth</h3>
+                    <p class="text-gray-700">Bluetooth is exploring enhancements like Channel Sounding for more accurate and secure distance measurement, Higher Data Throughput (HDT), and potentially higher frequency bands (e.g., 5 GHz or 6 GHz) for specific applications. LE Audio continues to mature, promising better audio quality and new broadcast capabilities. The focus remains on low power, robust short-range communication, and expanding IoT capabilities through features like Bluetooth Mesh and improved location services.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-2 accent-wifi">Future of WiFi</h3>
+                    <p class="text-gray-700">Wi-Fi 7 (802.11be) is set to deliver extremely high throughput (up to 46 Gbps), significantly lower latency (sub-5ms), and increased capacity through features like Multi-Link Operation (MLO) and 320 MHz channels. Non-connectivity applications, such as Wi-Fi sensing for health monitoring and gesture recognition, are expanding its utility. The push for more spectrum (like the 6 GHz band with Wi-Fi 6E/7) continues to be crucial for performance improvements in dense environments.</p>
+                </div>
+            </div>
+            <div class="mt-6 bg-white p-6 rounded-lg shadow">
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Coexistence and Synergy</h3>
+                <p class="text-gray-700">The dominant paradigm is not replacement but continued coexistence and synergy. Most sophisticated devices (smartphones, laptops) already incorporate both, leveraging each for its strengths. This trend will likely continue with tighter integration and smarter, context-aware switching to optimize performance, power, and user experience. The evolution of both is driven by user demands for IoT, AR/VR, and high-definition media, ensuring they remain critical components of the wireless landscape.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-auto">
+        <p>&copy; 2024 Interactive Technology Analyzer. Information based on the provided report.</p>
+    </footer>
+
+    <script>
+        const tabButtons = document.querySelectorAll('#navigation .nav-button');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                contentSections.forEach(section => section.classList.remove('active'));
+                document.getElementById(button.dataset.tab).classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Data for timelines and charts
+        const bluetoothEvolutionData = [
+            { version: "Bluetooth 1.2", year: "2003", rate: "1 Mbps", range: "10 m", features: "Adaptive Frequency Hopping (AFH)" },
+            { version: "Bluetooth 2.0+EDR", year: "2004", rate: "3 Mbps", range: "30 m", features: "Enhanced Data Rate (EDR)" },
+            { version: "Bluetooth 2.1+EDR", year: "2007", rate: "3 Mbps", range: "30 m", features: "Secure Simple Pairing (SSP)" },
+            { version: "Bluetooth 3.0+HS", year: "2009", rate: "24 Mbps (via 802.11 PAL)", range: "30 m", features: "High Speed (HS) via Alternate MAC/PHY (AMP)" },
+            { version: "Bluetooth 4.0", year: "2009", rate: "1 Mbps (LE), 3 Mbps (EDR)", range: "60 m (LE)", features: "Bluetooth Low Energy (BLE) introduction" },
+            { version: "Bluetooth 4.2", year: "2014", rate: "1 Mbps (LE), 3 Mbps (EDR)", range: "60 m (LE)", features: "Increased BLE data packet capacity, IPv6 support for BLE, LE Secure Connections" },
+            { version: "Bluetooth 5.0", year: "2016", rate: "2 Mbps (LE)", range: "240 m (LE)", features: "2x speed, 4x range, 8x advertising capacity for BLE" },
+            { version: "Bluetooth 5.1", year: "2019", rate: "2 Mbps (LE)", range: "240 m (LE)", features: "Direction Finding (AoA/AoD)" },
+            { version: "Bluetooth 5.2", year: "2020", rate: "2 Mbps (LE)", range: "240 m (LE)", features: "LE Audio, EATT, LE Isochronous Channels" },
+            { version: "Bluetooth 5.3", year: "2021", rate: "2 Mbps (LE)", range: "240 m (LE)", features: "Connection Subrating, Periodic Advertising Enhancements" },
+            { version: "Bluetooth 5.4", year: "2023", rate: "2 Mbps (LE)", range: "240 m (LE)", features: "PAwR, Encrypted Advertising Data (EAD)" }
+        ];
+
+        const wifiEvolutionData = [
+            { version: "802.11b (Wi-Fi 1)", year: "1999", bands: "2.4 GHz", rate: "11 Mbps", tech: "DSSS" },
+            { version: "802.11a (Wi-Fi 2)", year: "1999", bands: "5 GHz", rate: "54 Mbps", tech: "OFDM" },
+            { version: "802.11g (Wi-Fi 3)", year: "2003", bands: "2.4 GHz", rate: "54 Mbps", tech: "OFDM" },
+            { version: "802.11n (Wi-Fi 4)", year: "2009", bands: "2.4, 5 GHz", rate: "600 Mbps", tech: "MIMO, OFDM" },
+            { version: "802.11ac (Wi-Fi 5)", year: "2013", bands: "5 GHz", rate: "3.5 Gbps (up to 6.9 Gbps)", tech: "MU-MIMO (downlink), OFDM" },
+            { version: "802.11ax (Wi-Fi 6)", year: "2019", bands: "2.4, 5 GHz", rate: "9.6 Gbps", tech: "OFDMA, MU-MIMO (up/down), TWT" },
+            { version: "802.11ax (Wi-Fi 6E)", year: "2020", bands: "2.4, 5, 6 GHz", rate: "9.6 Gbps", tech: "Extends Wi-Fi 6 to 6 GHz band" },
+            { version: "802.11be (Wi-Fi 7)", year: "2024", bands: "2.4, 5, 6 GHz", rate: "46 Gbps", tech: "Multi-Link Operation (MLO), 320 MHz channels" }
+        ];
+
+        function populateTimeline(timelineId, data, isBluetooth) {
+            const timelineElement = document.getElementById(timelineId);
+            data.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `timeline-item p-4 rounded-lg shadow ${isBluetooth ? 'bg-blue-50 border-l-4 border-accent-bluetooth' : 'bg-emerald-50 border-l-4 border-accent-wifi'}`;
+                
+                const title = document.createElement('h4');
+                title.className = `font-semibold text-lg ${isBluetooth ? 'accent-bluetooth' : 'accent-wifi'} mb-1`;
+                title.textContent = `${item.version} (${item.year})`;
+                
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'timeline-details text-sm text-gray-600';
+                if (isBluetooth) {
+                    detailsDiv.innerHTML = `
+                        <p><strong>Max Data Rate:</strong> ${item.rate}</p>
+                        <p><strong>Typical Max Range:</strong> ${item.range}</p>
+                        <p><strong>Key Features:</strong> ${item.features}</p>
+                    `;
+                } else {
+                     detailsDiv.innerHTML = `
+                        <p><strong>Frequency Bands:</strong> ${item.bands}</p>
+                        <p><strong>Max Theoretical Data Rate:</strong> ${item.rate}</p>
+                        <p><strong>Key Technologies:</strong> ${item.tech}</p>
+                    `;
+                }
+                
+                itemDiv.appendChild(title);
+                itemDiv.appendChild(detailsDiv);
+                timelineElement.appendChild(itemDiv);
+
+                title.addEventListener('click', () => {
+                    detailsDiv.classList.toggle('expanded');
+                });
+            });
+        }
+
+        populateTimeline('bluetooth-timeline', bluetoothEvolutionData, true);
+        populateTimeline('wifi-timeline', wifiEvolutionData, false);
+
+        // Chart.js helper for label wrapping
+        function formatLabel(str, maxwidth){
+            let sections = [];
+            let words = str.split(" ");
+            let temp = "";
+
+            words.forEach((item, index) => {
+                if(temp.length > 0) {
+                    temp += " " + item;
+                } else {
+                    temp = item;
+                }
+                if(temp.length > maxwidth){
+                    sections.push(temp);
+                    temp = "";
+                }
+                if(index == words.length - 1 && temp.length > 0){
+                    sections.push(temp);
+                }
+            });
+            return sections;
+        }
+
+        // Range Chart
+        const rangeCtx = document.getElementById('rangeChart').getContext('2d');
+        new Chart(rangeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Bluetooth Classic (Class 2)', 'Bluetooth Classic (Class 1)', 'BLE 5.x', 'WiFi 2.4GHz', 'WiFi 5/6GHz'],
+                datasets: [{
+                    label: 'Typical Max Range (meters)',
+                    data: [10, 100, 240, 100, 70], // WiFi 5/6GHz typically less range than 2.4GHz indoors
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)', // blue
+                        'rgba(37, 99, 235, 0.7)',  // darker blue
+                        'rgba(2, 132, 199, 0.7)',  // sky blue
+                        'rgba(5, 150, 105, 0.7)',  // emerald green
+                        'rgba(4, 120, 87, 0.7)'   // darker emerald green
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(37, 99, 235, 1)',
+                        'rgba(2, 132, 199, 1)',
+                        'rgba(5, 150, 105, 1)',
+                        'rgba(4, 120, 87, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Range (m)' } },
+                    x: { ticks: { callback: function(value) { return formatLabel(this.getLabelForValue(value), 15); } } }
+                },
+                plugins: { legend: { display: false }, tooltip: { enabled: true } }
+            }
+        });
+
+        // Speed Chart
+        const speedCtx = document.getElementById('speedChart').getContext('2d');
+        new Chart(speedCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Bluetooth EDR (3 Mbps)', 'BLE 5.x (2 Mbps)', 'Wi-Fi 4 (600 Mbps)', 'Wi-Fi 5 (Up to 6.9 Gbps)', 'Wi-Fi 6/6E (9.6 Gbps)', 'Wi-Fi 7 (46 Gbps)'],
+                datasets: [{
+                    label: 'Max Theoretical Data Rate',
+                    data: [3, 2, 600, 6900, 9600, 46000], // In Mbps
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(2, 132, 199, 0.7)',
+                        'rgba(5, 150, 105, 0.7)',
+                        'rgba(4, 120, 87, 0.7)',
+                        'rgba(6, 95, 70, 0.7)',
+                        'rgba(2, 62, 44, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(2, 132, 199, 1)',
+                        'rgba(5, 150, 105, 1)',
+                        'rgba(4, 120, 87, 1)',
+                        'rgba(6, 95, 70, 1)',
+                        'rgba(2, 62, 44, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        type: 'logarithmic', 
+                        title: { display: true, text: 'Data Rate (Mbps - Log Scale)' },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                if (value === 1 || value === 10 || value === 100 || value === 1000 || value === 10000 || value === 100000) {
+                                    return value.toLocaleString() + ' Mbps';
+                                }
+                            }
+                        }
+                    },
+                    x: { ticks: { callback: function(value) { return formatLabel(this.getLabelForValue(value), 12); } } }
+                },
+                plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: (context) => `${context.raw.toLocaleString()} Mbps` } } }
+            }
+        });
+
+        // Power Consumption Chart (Qualitative representation)
+        const powerCtx = document.getElementById('powerChart').getContext('2d');
+        new Chart(powerCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Bluetooth LE (BLE)', 'Bluetooth Classic', 'WiFi (Idle/Low Use with TWT)', 'WiFi (Active High Data)'],
+                datasets: [{
+                    label: 'Relative Power Consumption Level',
+                    data: [1, 3, 5, 10], // Arbitrary units for comparison: Very Low, Low, Moderate, High
+                    backgroundColor: [
+                        'rgba(2, 132, 199, 0.7)',  // BLE - Sky
+                        'rgba(59, 130, 246, 0.7)', // Classic BT - Blue
+                        'rgba(5, 150, 105, 0.5)',  // WiFi Low - Lighter Green
+                        'rgba(4, 120, 87, 0.8)'   // WiFi High - Darker Green
+                    ],
+                    borderColor: [
+                        'rgba(2, 132, 199, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(5, 150, 105, 1)',
+                        'rgba(4, 120, 87, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Relative Power Consumption (Lower is Better)' }, ticks: { stepSize: 1 } },
+                    x: { ticks: { callback: function(value) { return formatLabel(this.getLabelForValue(value), 15); } } }
+                },
+                plugins: { legend: { display: false }, tooltip: { enabled: true } }
+            }
+        });
+
+
+        // Security Table Data
+        const securityData = [
+            { aspect: "Primary Key Exchange", bluetooth: "Elliptic Curve Diffie-Hellman (ECDH)", wifi: "Simultaneous Authentication of Equals (SAE) for Personal; 802.1X for Enterprise" },
+            { aspect: "Encryption Algorithm", bluetooth: "AES-128 CCM", wifi: "AES-CCMP or AES-GCM (often 128-bit, Enterprise can use 192-bit)" },
+            { aspect: "Authentication Method", bluetooth: "Pairing (Numeric Comparison, Passkey, OOB, Just Works)", wifi: "PSK (via SAE) for Personal; EAP methods (e.g., EAP-TLS) for Enterprise" },
+            { aspect: "Protection vs. Dictionary Attacks", bluetooth: "N/A (ECDH prevents); Passkey method relies on user input.", wifi: "Strong (SAE for Personal prevents offline dictionary attacks)" },
+            { aspect: "Forward Secrecy", bluetooth: "Provided by ECDH key exchange", wifi: "Provided by SAE in WPA3-Personal; depends on EAP method in Enterprise" },
+            { aspect: "Open Network Security", bluetooth: "N/A (Requires pairing)", wifi: "Enhanced Open (Opportunistic Wireless Encryption - OWE)" }
+        ];
+
+        const securityTableBody = document.getElementById('securityTable').getElementsByTagName('tbody')[0];
+        securityData.forEach(item => {
+            let row = securityTableBody.insertRow();
+            row.insertCell().textContent = item.aspect;
+            row.insertCell().textContent = item.bluetooth;
+            row.insertCell().textContent = item.wifi;
+        });
+
+        // Applications Data
+        const applicationsData = [
+            { category: "Personal Audio (Headphones/Speakers)", tech: "Bluetooth (Classic/LE Audio)", reason: "Low power, adequate bandwidth for audio, ease of pairing, established profiles (A2DP, HFP)." },
+            { category: "Wearable Technology", tech: "Bluetooth (BLE)", reason: "Ultra-low power consumption for long battery life, small form factor, suitable for sensor data." },
+            { category: "Wireless Peripherals (Mouse/Keyboard)", tech: "Bluetooth", reason: "Low latency, ease of pairing, sufficient range for desktop use, low power." },
+            { category: "High-Definition Video Streaming", tech: "WiFi", reason: "High bandwidth required, stable connection over moderate distances." },
+            { category: "Home/Office Internet Access", tech: "WiFi", reason: "Primary purpose, high speed, supports multiple users and devices, longer range." },
+            { category: "Low-Power IoT Sensors (Battery)", tech: "Bluetooth (BLE)", reason: "Extreme power efficiency, low cost, small data packets, mesh capability for wider coverage." },
+            { category: "IoT Devices Needing Direct Internet", tech: "WiFi", reason: "Direct internet connectivity without gateway, higher bandwidth for data-rich devices (e.g., cameras)." },
+            { category: "Asset Tracking (Short Range/Indoor)", tech: "Bluetooth (Beacons, AoA/AoD)", reason: "Low cost tags, good proximity detection, direction finding for precision." },
+            { category: "Large File Transfers (Local)", tech: "WiFi", reason: "Significantly higher data rates for speed and efficiency." },
+            { category: "Smart Security Cameras", tech: "WiFi", reason: "High bandwidth for video, continuous connectivity, often cloud-connected." }
+        ];
+
+        const applicationsGrid = document.getElementById('applications-grid');
+        const appDetailDiv = document.getElementById('application-details');
+        const appDetailTitle = document.getElementById('app-detail-title');
+        const appDetailTech = document.getElementById('app-detail-tech');
+        const appDetailReason = document.getElementById('app-detail-reason');
+
+        applicationsData.forEach(app => {
+            const card = document.createElement('div');
+            card.className = 'app-card bg-white p-4 rounded-lg shadow transition-all duration-200 ease-in-out';
+            const title = document.createElement('h4');
+            title.className = 'font-semibold text-md mb-1';
+            if (app.tech.toLowerCase().includes('bluetooth')) {
+                title.classList.add('accent-bluetooth');
+            } else {
+                title.classList.add('accent-wifi');
+            }
+            title.textContent = app.category;
+            card.appendChild(title);
+            
+            const techPreview = document.createElement('p');
+            techPreview.className = 'text-xs text-gray-500';
+            techPreview.textContent = `Preferred: ${app.tech.split('(')[0].trim()}`;
+            card.appendChild(techPreview);
+
+            card.addEventListener('click', () => {
+                appDetailTitle.textContent = app.category;
+                appDetailTitle.className = `text-xl font-semibold mb-2 ${app.tech.toLowerCase().includes('bluetooth') ? 'accent-bluetooth' : 'accent-wifi'}`;
+                appDetailTech.textContent = `Primary Technology: ${app.tech}`;
+                appDetailReason.textContent = `Reason: ${app.reason}`;
+                appDetailDiv.style.display = 'block';
+                appDetailDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+            applicationsGrid.appendChild(card);
+        });
+        
+        // Interactive Guide Logic
+        const getRecommendationButton = document.getElementById('getRecommendation');
+        const recommendationResultDiv = document.getElementById('recommendationResult');
+        const recommendationTitleElem = document.getElementById('recommendationTitle');
+        const recommendationTextElem = document.getElementById('recommendationText');
+
+        getRecommendationButton.addEventListener('click', () => {
+            const power = document.getElementById('power-need').value;
+            const datarate = document.getElementById('datarate-need').value;
+            const range = document.getElementById('range-need').value;
+            const internet = document.getElementById('internet-need').value;
+
+            let recommendation = "";
+            let reason = "";
+            let scoreBT = 0;
+            let scoreWiFi = 0;
+
+            // Power
+            if (power === "low") scoreBT += 2;
+            else if (power === "moderate") scoreWiFi += 1;
+
+            // Data Rate
+            if (datarate === "low") scoreBT += 1;
+            else if (datarate === "high") scoreWiFi += 2;
+            
+            // Range
+            if (range === "short") scoreBT += 1;
+            else if (range === "long") scoreWiFi += 1;
+
+            // Internet
+            if (internet === "yes") scoreWiFi += 2;
+            else if (internet === "no") scoreBT +=1;
+
+
+            if (scoreBT > scoreWiFi) {
+                recommendation = "Bluetooth (likely BLE)";
+                recommendationTitleElem.className = "text-lg font-semibold accent-bluetooth";
+                reason = "Bluetooth excels in low-power, short-range scenarios. If your primary needs are battery life and personal-area connectivity for lower data rates, Bluetooth is often the better choice.";
+                if (power === "low") reason += " Especially strong for ultra-low power needs.";
+                if (datarate === "low" && range === "short") reason += " Ideal for things like wearables or wireless peripherals.";
+                if (internet === "no") reason += " Suitable when direct internet access for the device isn't critical or a gateway is used.";
+            } else if (scoreWiFi > scoreBT) {
+                recommendation = "WiFi";
+                recommendationTitleElem.className = "text-lg font-semibold accent-wifi";
+                reason = "WiFi is superior for high-speed data transfer, longer range, and direct internet access. If performance and network connectivity are key, WiFi is generally preferred.";
+                if (datarate === "high") reason += " Essential for video streaming, large file transfers, or fast internet.";
+                if (range === "long") reason += " Better for whole-home or office coverage.";
+                if (internet === "yes") reason += " The go-to for devices needing their own internet connection.";
+            } else { // Tie or "any" for all
+                recommendation = "Either Bluetooth or WiFi could be suitable";
+                recommendationTitleElem.className = "text-lg font-semibold text-gray-700";
+                reason = "Your preferences don't strongly point to one over the other, or many criteria are flexible. Consider secondary factors: Bluetooth for simplicity in device-to-device links and extreme low power (BLE), WiFi for network integration and higher throughput. Many devices use both!";
+                 if (power === "low" && datarate === "low") {
+                    recommendation = "Bluetooth (likely BLE) seems a good fit.";
+                    reason = "Prioritizing low power and low data rates points towards Bluetooth, especially BLE for battery-operated devices.";
+                } else if (datarate === "high" && internet === "yes") {
+                    recommendation = "WiFi is likely the better choice.";
+                    reason = "High data rate needs and direct internet connectivity are hallmarks of WiFi applications.";
+                }
+            }
+            
+            recommendationTitleElem.textContent = `Recommendation: ${recommendation}`;
+            recommendationTextElem.textContent = reason;
+            recommendationResultDiv.style.display = 'block';
+            recommendationResultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+    </script>
+</body>
+</html>
