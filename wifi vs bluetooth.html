@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth vs. WiFi: Wireless Technology Market Insights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Intro: Text. Goal: Inform.
+        - Core Tech Evolution (Bluetooth & WiFi): HTML/CSS Timelines. Goal: Change. Method: HTML/CSS. Justification: Clear chronological display of standard evolution.
+        - Application Strongholds (Bluetooth & WiFi): Donut Charts. Goal: Compare (market presence). Method: Chart.js Canvas. Justification: Visual breakdown of dominant application areas. Data derived from Table 5.
+        - Performance (Range, Speed, Power): Bar Charts. Goal: Compare. Method: Chart.js Canvas. Justification: Direct comparison of key metrics. Data from Sec III.B.
+        - Connectivity & Cost: HTML Cards. Goal: Inform/Organize. Method: HTML/CSS. Justification: Concise presentation of these factors.
+        - Security Snapshot: HTML List/Cards. Goal: Inform. Method: HTML/CSS. Justification: Summarizes key security features.
+        - Coexistence Model: HTML/CSS Diagram. Goal: Organize (process flow). Method: HTML/CSS. Justification: Illustrates synergy.
+        - Future Outlook: Text, Big Number. Goal: Inform. Method: Text, Large styled text. Justification: Highlights future trends.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F0F0F0; color: #222222; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 280px; sm:height: 320px; max-height: 350px; }
+        .section-title { color: #0A2463; }
+        .card { background-color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .timeline { position: relative; padding-left: 2.5rem; }
+        .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 4px; background-color: #3E92CC; border-radius: 2px; }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -2.25rem; top: 0.25rem; width: 1.25rem; height: 1.25rem; background-color: #10E7DC; border: 3px solid #3E92CC; border-radius: 50%; z-index: 1; }
+        .timeline-item-content { background-color: #D8F0FF; padding: 0.75rem 1rem; border-radius: 0.375rem; color: #0A2463;}
+        .big-number { font-size: 3rem; font-weight: bold; color: #10E7DC; }
+        .flow-diagram-item { background-color: #D8F0FF; color: #0A2463; padding: 0.75rem; border-radius: 0.375rem; text-align: center; border: 2px solid #3E92CC;}
+        .flow-arrow { font-size: 1.5rem; color: #3E92CC; margin: 0 0.5rem; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-0A2463 text-D8F0FF py-8 text-center">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold">Bluetooth vs. WiFi</h1>
+            <p class="text-xl mt-2">A Market Insights Infographic on Short-Range Wireless Technologies</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <section id="introduction" class="mb-12">
+            <div class="card text-center">
+                <h2 class="text-3xl font-semibold section-title mb-4">The Wireless Duopoly: Shaping Device Connectivity</h2>
+                <p class="text-lg leading-relaxed">Bluetooth and WiFi are foundational to modern wireless communication, each dominating distinct market segments. Bluetooth champions personal-scale, low-power connections, ideal for wearables and peripherals. WiFi powers robust, high-speed network access for homes, offices, and public spaces. This infographic explores their comparative market positions, technological strengths, and future trajectories.</p>
+            </div>
+        </section>
+
+        <section id="core-tech-evolution" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Evolution of Wireless Standards</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-3E92CC mb-4 text-center">Bluetooth's Journey: PANs & Low Energy</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>Bluetooth 1.x (1999-2003):</strong> Foundation, ~1 Mbps. AFH in 1.2.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>Bluetooth 2.x (2004-2007):</strong> EDR up to 3 Mbps. Simplified pairing.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>Bluetooth 4.x (2009-2014):</strong> BLE introduced. IPv6 support.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>Bluetooth 5.x (2016-Present):</strong> 2x speed, 4x range for BLE. Direction Finding, LE Audio, PAwR.</div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">Bluetooth's evolution has prioritized low-power operation for battery-driven devices and specific data rates for applications like audio and sensor networks.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-3E92CC mb-4 text-center">WiFi's Ascent: WLANs & High Throughput</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>802.11b/a/g (1999-2003):</strong> Up to 11/54 Mbps. 2.4/5 GHz.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>802.11n (Wi-Fi 4, 2009):</strong> MIMO. Up to 600 Mbps.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>802.11ac (Wi-Fi 5, 2013):</strong> MU-MIMO. Up to ~3.5+ Gbps.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-item-content"><strong>802.11ax/be (Wi-Fi 6/6E/7, 2019-Present):</strong> OFDMA. 6GHz band. Up to 9.6/46 Gbps. MLO.</div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">WiFi's standards have consistently driven higher data rates, increased capacity, and efficiency to meet escalating demands for internet access and local networking.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="application-strongholds" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Market Dominance: Application Strongholds</h2>
+            <p class="text-center text-gray-700 mb-8">While direct market share figures vary, the primary applications highlight where each technology holds significant sway. This is based on their suitability for key use cases.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-3E92CC mb-4 text-center">Bluetooth: King of Personal Connectivity</h3>
+                    <div class="chart-container mx-auto h-64 sm:h-72 md:h-80">
+                        <canvas id="bluetoothAppsChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600 text-center">Excels in wearables, audio streaming, and wireless peripherals due to low power and ease of use.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-3E92CC mb-4 text-center">WiFi: The Network Backbone</h3>
+                    <div class="chart-container mx-auto h-64 sm:h-72 md:h-80">
+                        <canvas id="wifiAppsChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600 text-center">Dominates internet access, video streaming, and robust smart home devices needing high bandwidth.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="performance-metrics" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Performance Face-Off: Key Metrics</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-3E92CC mb-3 text-center">Range Capabilities</h3>
+                    <div class="chart-container h-56 sm:h-64">
+                        <canvas id="rangeCompareChart"></canvas>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500 text-center">WiFi generally offers longer range, though BLE 5.x has extended Bluetooth's reach. Environmental factors are key.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-3E92CC mb-3 text-center">Data Transfer Speeds</h3>
+                     <div class="chart-container h-56 sm:h-64">
+                        <canvas id="speedCompareChart"></canvas>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500 text-center">WiFi provides vastly superior data rates, essential for bandwidth-heavy tasks. Bluetooth is for lower throughput needs.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-3E92CC mb-3 text-center">Power Consumption</h3>
+                    <div class="chart-container h-56 sm:h-64">
+                        <canvas id="powerCompareChart"></canvas>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500 text-center">BLE is the champion of low power. WiFi, while improving, is inherently more power-hungry.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="connectivity-cost-security" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Connectivity, Cost & Security Snapshot</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-3E92CC mb-2">Device Connectivity</h3>
+                    <p class="text-sm"><strong class="text-0A2463">Bluetooth:</strong> Up to 7 active slaves per master (piconet). Ideal for personal device clusters.</p>
+                    <p class="text-sm mt-1"><strong class="text-0A2463">WiFi:</strong> Dozens practical (hundreds theoretical) per Access Point. Built for shared network access.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-3E92CC mb-2">Implementation Cost</h3>
+                    <p class="text-sm"><strong class="text-0A2463">Bluetooth:</strong> Generally lower IC/module costs, especially BLE. Simpler hardware for low-power designs.</p>
+                    <p class="text-sm mt-1"><strong class="text-0A2463">WiFi:</strong> Higher component costs. More complex hardware/firmware, though IoT solutions are simplifying.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-3E92CC mb-2">Security Highlights</h3>
+                    <p class="text-sm"><strong class="text-0A2463">Bluetooth (LESC):</strong> AES-128, ECDH key exchange. Strong device-to-device security.</p>
+                    <p class="text-sm mt-1"><strong class="text-0A2463">WiFi (WPA3):</strong> AES-GCM, SAE authentication. Robust network-level security, resistant to many past attacks.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech-adoption" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Tech Adoption in Key Market Segments</h2>
+            <p class="text-center text-gray-700 mb-8">A look at which technology is typically chosen for various popular applications, reflecting their market penetration and suitability.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-0A2463 mb-2">🎧 Personal Audio</h4>
+                    <p class="text-sm"><strong>Primary:</strong> <span class="font-bold text-3E92CC">Bluetooth</span> (Classic/LE Audio)</p>
+                    <p class="text-xs text-gray-600">Low power, ease of pairing, established audio profiles.</p>
+                </div>
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-0A2463 mb-2">⌚ Wearables</h4>
+                    <p class="text-sm"><strong>Primary:</strong> <span class="font-bold text-3E92CC">Bluetooth (BLE)</span></p>
+                    <p class="text-xs text-gray-600">Ultra-low power for long battery life, small data packets.</p>
+                </div>
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-0A2463 mb-2">🏠 Home Internet</h4>
+                    <p class="text-sm"><strong>Primary:</strong> <span class="font-bold text-3E92CC">WiFi</span></p>
+                    <p class="text-xs text-gray-600">High speed, supports multiple users, broad coverage.</p>
+                </div>
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-0A2463 mb-2">📹 HD Video Streaming</h4>
+                    <p class="text-sm"><strong>Primary:</strong> <span class="font-bold text-3E92CC">WiFi</span></p>
+                    <p class="text-xs text-gray-600">High bandwidth essential for quality and stability.</p>
+                </div>
+                 <div class="card">
+                    <h4 class="text-lg font-semibold text-0A2463 mb-2">💡 IoT Sensors (Low Power)</h4>
+                    <p class="text-sm"><strong>Primary:</strong> <span class="font-bold text-3E92CC">Bluetooth (BLE)</span></p>
+                    <p class="text-xs text-gray-600">Extreme power efficiency, low cost, mesh capabilities.</p>
+                </div>
+                 <div class="card">
+                    <h4 class="text-lg font-semibold text-0A2463 mb-2">🌐 IoT Devices (Direct Internet)</h4>
+                    <p class="text-sm"><strong>Primary:</strong> <span class="font-bold text-3E92CC">WiFi</span></p>
+                    <p class="text-xs text-gray-600">Direct IP connectivity, higher bandwidth for rich data.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="coexistence-model" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Market Synergy: The Coexistence Model</h2>
+            <p class="text-center text-gray-700 mb-8">Often, Bluetooth and WiFi work in tandem, leveraging their respective strengths. Here's a common IoT scenario:</p>
+            <div class="card">
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div class="flow-diagram-item">📱 BLE Sensor Data</div>
+                    <div class="flow-arrow self-center">➡️</div>
+                    <div class="flow-diagram-item">💻 Smartphone/Hub (via Bluetooth)</div>
+                    <div class="flow-arrow self-center">➡️</div>
+                    <div class="flow-diagram-item">📡 WiFi Router</div>
+                    <div class="flow-arrow self-center">➡️</div>
+                    <div class="flow-diagram-item">☁️ Cloud Service</div>
+                </div>
+                <p class="mt-4 text-sm text-gray-600 text-center">This illustrates how Bluetooth handles edge device connectivity, while WiFi provides the robust backhaul to the internet or local network.</p>
+            </div>
+        </section>
+
+        <section id="future-outlook" class="mb-12">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Future Market Trajectories</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-3E92CC mb-3">Bluetooth's Horizon</h3>
+                    <p class="text-gray-700">Focus on enhancing LE Audio, expanding Direction Finding for precise location services, and exploring Channel Sounding for secure distance measurement. Continued growth in IoT, wearables, and automotive sectors is anticipated.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-3E92CC mb-3">WiFi's Evolution</h3>
+                    <p class="text-gray-700">Wi-Fi 7 promises massive throughput and ultra-low latency, targeting AR/VR and industrial IoT. Expansion into the 6 GHz band (Wi-Fi 6E/7) alleviates congestion. Wi-Fi sensing is an emerging field for non-connectivity applications.</p>
+                </div>
+            </div>
+            <div class="card text-center mt-8">
+                <p class="text-xl text-gray-700 mb-2">The short-range wireless market is projected to connect over</p>
+                <p class="big-number">70 Billion</p> <p class="text-xl text-gray-700 mt-2">devices by 2030, with both Bluetooth and WiFi playing crucial, evolving roles.</p>
+            </div>
+        </section>
+
+        <footer class="bg-0A2463 text-D8F0FF py-8 text-center">
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl font-semibold mb-3">Distinct Roles, Shared Future</h2>
+                <p class="text-md leading-relaxed max-w-3xl mx-auto">Neither Bluetooth nor WiFi is universally "better." Their market strength lies in their specialization. Bluetooth excels in low-power, personal-scale connectivity, while WiFi delivers high-performance network access. The future is one of continued coexistence and synergy, driving innovation across countless industries.</p>
+                <p class="text-xs mt-6">&copy; 2024 Wireless Technology Market Insights. Data based on "Bluetooth vs. WiFi: A Comprehensive Technical Analysis".</p>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        const chartJsTooltipConfig = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        function formatLabel(str, maxwidth = 16) {
+            let sections = [];
+            let words = String(str).split(" ");
+            let temp = "";
+            words.forEach((item, index) => {
+                if (temp.length > 0) {
+                    temp += " " + item;
+                } else {
+                    temp = item;
+                }
+                if (temp.length > maxwidth) {
+                    sections.push(temp);
+                    temp = "";
+                }
+                if (index === words.length - 1 && temp.length > 0) {
+                    sections.push(temp);
+                }
+            });
+            return sections.length > 0 ? sections : [str];
+        }
+        
+        // Brilliant Blues Palette
+        const darkBlue = '#0A2463';
+        const mediumBlue = '#3E92CC';
+        const lightBlue = '#D8F0FF';
+        const accentCyan = '#10E7DC';
+
+        // Application Strongholds Charts
+        const bluetoothAppsData = {
+            labels: ['Personal Audio', 'Wearables', 'Wireless Peripherals', ['IoT Sensors', '(Low Power)'], 'Automotive'],
+            datasets: [{
+                label: 'Bluetooth Application Share',
+                data: [30, 25, 20, 15, 10], // Illustrative percentages
+                backgroundColor: [mediumBlue, accentCyan, darkBlue, '#6CBEEB', '#2A628F'],
+                borderColor: '#F0F0F0',
+                borderWidth: 2
+            }]
+        };
+        new Chart(document.getElementById('bluetoothAppsChart'), {
+            type: 'doughnut',
+            data: bluetoothAppsData,
+            options: { responsive: true, maintainAspectRatio: false, ...chartJsTooltipConfig, plugins: { ...chartJsTooltipConfig.plugins, legend: { position: 'bottom', labels: { color: '#222222' } }} }
+        });
+
+        const wifiAppsData = {
+            labels: [['Home/Office', 'Internet'], ['Video Streaming', '& Gaming'], ['Large File', 'Transfers'], ['Robust Smart Home', '(e.g. Cameras)'], 'WLAN'],
+            datasets: [{
+                label: 'WiFi Application Share',
+                data: [35, 25, 15, 15, 10], // Illustrative percentages
+                backgroundColor: [mediumBlue, accentCyan, darkBlue, '#6CBEEB', '#2A628F'],
+                borderColor: '#F0F0F0',
+                borderWidth: 2
+            }]
+        };
+        new Chart(document.getElementById('wifiAppsChart'), {
+            type: 'doughnut',
+            data: wifiAppsData,
+            options: { responsive: true, maintainAspectRatio: false, ...chartJsTooltipConfig, plugins: { ...chartJsTooltipConfig.plugins, legend: { position: 'bottom', labels: { color: '#222222' } }} }
+        });
+
+        // Performance Comparison Charts
+        const rangeData = {
+            labels: [formatLabel('BT Classic (10m)'), formatLabel('BT BLE 5.x (240m*)'), formatLabel('WiFi 2.4GHz (100m*)'), formatLabel('WiFi 5/6GHz (70m*)')],
+            datasets: [{
+                label: 'Typical Max Range (meters, *theoretical/ideal)',
+                data: [10, 240, 100, 70],
+                backgroundColor: [mediumBlue, lightBlue, darkBlue, accentCyan],
+            }]
+        };
+        new Chart(document.getElementById('rangeCompareChart'), {
+            type: 'bar',
+            data: rangeData,
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: '#222222' } }, x: { ticks: { color: '#222222' } } }, ...chartJsTooltipConfig, plugins: { ...chartJsTooltipConfig.plugins, legend: { display: false }} }
+        });
+
+        const speedData = {
+            labels: [formatLabel('BT EDR (3 Mbps)'), formatLabel('BT BLE (2 Mbps)'), formatLabel('WiFi 4 (600 Mbps)'), formatLabel('WiFi 6 (9.6 Gbps)'), formatLabel('WiFi 7 (46 Gbps)')],
+            datasets: [{
+                label: 'Max Theoretical Data Rate',
+                data: [3, 2, 600, 9600, 46000], // Mbps
+                backgroundColor: [mediumBlue, lightBlue, darkBlue, accentCyan, '#08A090'],
+            }]
+        };
+        new Chart(document.getElementById('speedCompareChart'), {
+            type: 'bar',
+            data: speedData,
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { type: 'logarithmic', beginAtZero: true, ticks: { color: '#222222' } }, x: { ticks: { color: '#222222' } } }, ...chartJsTooltipConfig, plugins: { ...chartJsTooltipConfig.plugins, legend: { display: false }, tooltip: { callbacks: { ...chartJsTooltipConfig.plugins.tooltip.callbacks, label: (context) => context.parsed.y + ' Mbps'}}} }
+        });
+        
+        const powerData = {
+            labels: [formatLabel('Bluetooth LE (Very Low)'), formatLabel('BT Classic (Low)'), formatLabel('WiFi Idle (Moderate)'), formatLabel('WiFi Active (High)')],
+            datasets: [{
+                label: 'Relative Power Consumption',
+                data: [1, 3, 5, 10], // Arbitrary relative units
+                backgroundColor: [accentCyan, lightBlue, mediumBlue, darkBlue],
+            }]
+        };
+        new Chart(document.getElementById('powerCompareChart'), {
+            type: 'bar',
+            data: powerData,
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: '#222222' } }, x: { ticks: { color: '#222222' } } }, ...chartJsTooltipConfig, plugins: { ...chartJsTooltipConfig.plugins, legend: { display: false }} }
+        });
+
+    </script>
+</body>
+</html>
