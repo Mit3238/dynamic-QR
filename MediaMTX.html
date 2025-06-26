@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to MediaMTX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed with a task-oriented, tabbed navigation to allow users to directly access the information most relevant to them, rather than scrolling through a long report. The structure is: 1. Overview: For a quick summary and the core "Media Router" concept. 2. Protocols & Codecs: An interactive section to visually explore compatibility. 3. Key Workflows: To deconstruct complex processes like recording and authentication into simple, visual steps. 4. Configuration & Deployment: Practical, actionable information for setup and production use. This non-linear, thematic structure prioritizes user discovery and understanding over mirroring the original report's layout, making complex technical information more digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Project Summary (Table 1) -> Goal: Inform -> Viz: Styled HTML Table -> Justification: Clear, concise presentation of key facts.
+        - Report Info: "Media Router" Concept -> Goal: Explain -> Viz: HTML/CSS Diagram -> Interaction: Static visual aid -> Justification: A visual metaphor is more intuitive than text alone for explaining the core architecture.
+        - Report Info: Protocol Support (Table 2) -> Goal: Compare -> Viz: Chart.js Bar Chart -> Interaction: Hover tooltips -> Justification: Visually compares ingress/egress capabilities across multiple protocols effectively.
+        - Report Info: Recording Workflow (fMP4 vs MP4) -> Goal: Explain Process -> Viz: HTML/CSS Step-by-step diagram -> Interaction: Hover highlights on steps -> Justification: Breaks down a critical, nuanced process into an easy-to-follow visual sequence, clarifying the two-stage approach.
+        - Report Info: Authentication Methods (Table 3) -> Goal: Compare -> Viz: Interactive HTML Cards -> Interaction: Click to reveal details -> Justification: Allows for a high-level comparison while hiding complex details until requested, reducing cognitive load.
+        - Report Info: Hardware Sizing (Table 4) -> Goal: Compare -> Viz: Chart.js Bar Chart -> Interaction: Hover tooltips -> Justification: Makes resource scaling recommendations easily comparable across different tiers.
+        - Report Info: Production Checklist (Table 5) -> Goal: Inform/Action -> Viz: Interactive HTML Checklist -> Interaction: Click to toggle state -> Justification: Transforms a static list into an engaging, actionable tool.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            border-bottom-color: #0ea5e9; /* sky-500 */
+            color: #0c4a6e; /* sky-900 */
+        }
+        .flow-diagram-step {
+            transition: all 0.3s ease;
+        }
+        .flow-diagram-step:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <h1 class="text-2xl font-bold text-slate-800">Interactive Guide to MediaMTX</h1>
+                <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600">
+                    <a href="#overview" class="nav-link active">Overview</a>
+                    <a href="#protocols" class="nav-link">Protocols</a>
+                    <a href="#workflows" class="nav-link">Workflows</a>
+                    <a href="#config" class="nav-link">Configuration</a>
+                    <a href="#deployment" class="nav-link">Deployment</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <!-- Overview Section -->
+        <section id="overview" class="space-y-12 scroll-mt-24">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-slate-900">What is MediaMTX?</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">This application provides an interactive summary of the MediaMTX real-time media server. Explore its core concepts, features, and operational workflows through dynamic charts and diagrams, designed to make complex technical details easy to understand.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Project at a Glance</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <tbody>
+                                <tr class="border-b"><td class="py-2 font-medium text-slate-500">Former Name</td><td class="py-2">`rtsp-simple-server`</td></tr>
+                                <tr class="border-b"><td class="py-2 font-medium text-slate-500">Primary Function</td><td class="py-2">Real-time Media Server & Proxy</td></tr>
+                                <tr class="border-b"><td class="py-2 font-medium text-slate-500">Core Technology</td><td class="py-2">Go (golang)</td></tr>
+                                <tr class="border-b"><td class="py-2 font-medium text-slate-500">License</td><td class="py-2">MIT License (Permissive)</td></tr>
+                                <tr class="border-b"><td class="py-2 font-medium text-slate-500">Key Strengths</td><td class="py-2">Zero-dependency, Cross-platform</td></tr>
+                                <tr><td class="py-2 font-medium text-slate-500">Docker Hub</td><td class="py-2">`bluenviron/mediamtx`</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">The "Media Router" Concept</h3>
+                    <div class="relative flex flex-col items-center justify-center space-y-4 p-4 min-h-[220px]">
+                        <div class="flex items-center justify-around w-full">
+                            <div class="text-center">
+                                <div class="text-3xl">📹</div>
+                                <div class="font-semibold text-sky-700">RTSP</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl">📡</div>
+                                <div class="font-semibold text-sky-700">SRT</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl">🌐</div>
+                                <div class="font-semibold text-sky-700">WebRTC</div>
+                            </div>
+                        </div>
+                        <div class="w-full flex justify-center items-center">
+                             <div class="w-16 h-1 bg-slate-200"></div>
+                             <div class="text-5xl text-slate-400 -mt-2 mx-2">→</div>
+                             <div class="w-24 h-24 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-center leading-tight shadow-lg">Media MTX</div>
+                             <div class="text-5xl text-slate-400 -mt-2 mx-2">→</div>
+                             <div class="w-16 h-1 bg-slate-200"></div>
+                        </div>
+                        <div class="flex items-center justify-around w-full">
+                            <div class="text-center">
+                                <div class="text-3xl">📱</div>
+                                <div class="font-semibold text-teal-700">HLS</div>
+                            </div>
+                             <div class="text-center">
+                                <div class="text-3xl">🖥️</div>
+                                <div class="font-semibold text-teal-700">RTMP</div>
+                            </div>
+                             <div class="text-center">
+                                <div class="text-3xl">🌍</div>
+                                <div class="font-semibold text-teal-700">WebRTC</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center text-sm text-slate-600 mt-2">Publish a stream once on any protocol, and MediaMTX automatically makes it available for reading on all other supported protocols without extra configuration.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Protocols Section -->
+        <section id="protocols" class="space-y-12 scroll-mt-24 pt-20">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Universal Protocol Translator</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">MediaMTX excels at bridging different streaming technologies. This section visualizes its extensive support for both publishing (ingress) and reading (egress) streams across a wide range of protocols. Hover over the bars to see details.</p>
+            </div>
+             <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Protocol Support Matrix</h3>
+                <div class="chart-container">
+                    <canvas id="protocolChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                 <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Supported Codecs</h3>
+                 <p class="text-center text-slate-600 mb-6">Thanks to its remuxing core, MediaMTX is compatible with nearly all modern video and audio codecs, passing them through efficiently without costly re-encoding.</p>
+                 <div class="grid md:grid-cols-2 gap-6">
+                     <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mb-3">Video Codecs</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-sky-100 text-sky-800 text-sm font-medium px-3 py-1 rounded-full">H.264 (AVC)</span>
+                            <span class="bg-sky-100 text-sky-800 text-sm font-medium px-3 py-1 rounded-full">H.265 (HEVC)</span>
+                            <span class="bg-sky-100 text-sky-800 text-sm font-medium px-3 py-1 rounded-full">AV1</span>
+                            <span class="bg-sky-100 text-sky-800 text-sm font-medium px-3 py-1 rounded-full">VP9</span>
+                             <span class="bg-sky-100 text-sky-800 text-sm font-medium px-3 py-1 rounded-full">VP8</span>
+                            <span class="bg-sky-100 text-sky-800 text-sm font-medium px-3 py-1 rounded-full">M-JPEG</span>
+                        </div>
+                     </div>
+                     <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mb-3">Audio Codecs</h4>
+                        <div class="flex flex-wrap gap-2">
+                             <span class="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full">Opus</span>
+                             <span class="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full">AAC</span>
+                             <span class="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full">MP3</span>
+                             <span class="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full">G.711 (PCMA/PCMU)</span>
+                             <span class="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full">AC-3</span>
+                        </div>
+                     </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Workflows Section -->
+        <section id="workflows" class="space-y-16 scroll-mt-24 pt-20">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Key Functional Workflows</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Understanding how MediaMTX handles common tasks like recording and authentication is crucial. These diagrams break down the most important processes into simple, easy-to-follow steps.</p>
+            </div>
+            
+            <!-- Recording Workflow -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-slate-800 mb-2 text-center">Workflow: Stream Recording & Playback</h3>
+                <p class="text-center text-slate-600 mb-8">MediaMTX uses a crash-safe `fMP4` format for live recording to prevent data loss. This workflow shows how these recordings are then made available for playback in a standard, universally compatible format.</p>
+                <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 text-center">
+                    
+                    <div class="flow-diagram-step flex-1 bg-slate-50 p-4 rounded-lg border">
+                        <div class="text-4xl">🔴</div>
+                        <h4 class="font-bold mt-2">1. Live Stream Ingest</h4>
+                        <p class="text-sm text-slate-600">A stream from any source is published to a path configured with `record: yes`.</p>
+                    </div>
+
+                    <div class="self-center text-3xl text-slate-400 mx-4 my-2 md:my-0">→</div>
+
+                    <div class="flow-diagram-step flex-1 bg-slate-50 p-4 rounded-lg border border-red-300 ring-2 ring-red-100">
+                        <div class="text-4xl">💾</div>
+                        <h4 class="font-bold mt-2">2. Crash-Safe Recording</h4>
+                        <p class="text-sm text-slate-600">The server writes to a <strong class="text-red-600">Fragmented MP4 (`fMP4`)</strong> file. This format is robust against interruptions, ensuring data integrity.</p>
+                    </div>
+
+                    <div class="self-center text-3xl text-slate-400 mx-4 my-2 md:my-0">→</div>
+
+                    <div class="flex-1 space-y-4">
+                         <div class="flow-diagram-step bg-slate-50 p-4 rounded-lg border border-green-300">
+                             <div class="text-2xl">▶️</div>
+                             <h4 class="font-bold mt-1">3a. On-Demand Playback</h4>
+                             <p class="text-sm text-slate-600">The API reads the `fMP4` segments and dynamically creates a <strong class="text-green-600">Standard MP4</strong> stream, which is fully seekable and compatible.</p>
+                         </div>
+                         <div class="flow-diagram-step bg-slate-50 p-4 rounded-lg border border-green-300">
+                             <div class="text-2xl">⚙️</div>
+                             <h4 class="font-bold mt-1">3b. Offline Conversion</h4>
+                             <p class="text-sm text-slate-600">Use an FFmpeg command to post-process the `fMP4` file into a <strong class="text-green-600">Standard MP4</strong> for archiving or distribution.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentication Workflow -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-slate-800 mb-2 text-center">Workflow: External API Authentication</h3>
+                 <p class="text-center text-slate-600 mb-8">The `http` authentication method offers ultimate flexibility by delegating authorization decisions to your own external API or service via a webhook.</p>
+                <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 text-center">
+                    <div class="flow-diagram-step flex-1 bg-slate-50 p-4 rounded-lg border">
+                        <div class="text-4xl">👤</div>
+                        <h4 class="font-bold mt-2">1. Client Connects</h4>
+                        <p class="text-sm text-slate-600">A user tries to publish or read a stream.</p>
+                    </div>
+                    <div class="self-center text-3xl text-slate-400 mx-4 my-2 md:my-0">→</div>
+                    <div class="flow-diagram-step flex-1 bg-slate-50 p-4 rounded-lg border">
+                        <div class="text-4xl">⏸️</div>
+                        <h4 class="font-bold mt-2">2. Request to Webhook</h4>
+                        <p class="text-sm text-slate-600">MediaMTX pauses the request and sends a POST with client details (IP, user, path) to your API.</p>
+                    </div>
+                     <div class="self-center text-3xl text-slate-400 mx-4 my-2 md:my-0">→</div>
+                    <div class="flow-diagram-step flex-1 bg-slate-50 p-4 rounded-lg border">
+                        <div class="text-4xl">🔐</div>
+                        <h4 class="font-bold mt-2">3. API Authorizes</h4>
+                        <p class="text-sm text-slate-600">Your API applies custom logic (checks DB, subscription) and returns a status code.</p>
+                    </div>
+                     <div class="self-center text-3xl text-slate-400 mx-4 my-2 md:my-0">→</div>
+                    <div class="flow-diagram-step flex-1 bg-slate-50 p-4 rounded-lg border">
+                        <div class="text-4xl">✅/❌</div>
+                        <h4 class="font-bold mt-2">4. Connection Allowed/Denied</h4>
+                        <p class="text-sm text-slate-600">MediaMTX allows the connection on a `2xx` response and denies it otherwise.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section id="config" class="space-y-12 scroll-mt-24 pt-20">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Configuration & Control</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">MediaMTX is controlled via a YAML file, a REST API, and event-driven hooks. This section highlights the most common configuration choices, focusing on securing your streams.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                 <h3 class="text-xl font-semibold text-slate-800 mb-6 text-center">Comparing Authentication Methods</h3>
+                 <div class="grid md:grid-cols-3 gap-6" id="auth-cards">
+                    <!-- Cards will be injected by JS -->
+                 </div>
+                 <div id="auth-details" class="mt-6 bg-slate-100 p-4 rounded-lg hidden"></div>
+            </div>
+        </section>
+        
+        <!-- Deployment Section -->
+        <section id="deployment" class="space-y-12 scroll-mt-24 pt-20">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Performance & Deployment</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Properly sizing your server and following deployment best practices are key to a reliable production environment. Explore hardware recommendations and a production-ready checklist.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Recommended Sizing (Remuxing Only)</h3>
+                <p class="text-center text-slate-600 max-w-2xl mx-auto mb-6">Hardware needs scale with usage. These tiers are for remuxing workloads, MediaMTX's most efficient use case. Transcoding via hooks requires significantly more CPU/GPU resources.</p>
+                <div class="chart-container">
+                    <canvas id="sizingChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-slate-800 mb-6 text-center">Production Deployment Checklist</h3>
+                <div class="max-w-2xl mx-auto space-y-3" id="checklist">
+                    <!-- Checklist items will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="text-center py-8 border-t mt-12">
+        <p class="text-sm text-slate-500">Interactive application generated based on the expert report on MediaMTX.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Data Store ---
+    const authData = [
+        { 
+            name: 'Internal', 
+            description: 'Simple, static user/password definitions directly in the `mediamtx.yml` file.',
+            complexity: 'Low',
+            scalability: 'Low',
+            useCase: 'Best for testing, home labs, or small-scale setups with static credentials.',
+            details: 'Users are defined under the `credentials` property for a path. Not recommended for dynamic or high-security environments.'
+        },
+        { 
+            name: 'HTTP Webhook', 
+            description: 'Delegates authentication to an external API you control.',
+            complexity: 'Medium',
+            scalability: 'High',
+            useCase: 'Ideal for integrating with existing user databases, custom business logic, and paywalls.',
+            details: 'MediaMTX sends a POST request with connection details to your API, which responds with an allow/deny status code. The request body looks like:<br><pre class="bg-slate-800 text-white p-2 rounded-md text-xs mt-2 overflow-auto"><code>{\n  "user": "username",\n  "password": "password",\n  "ip": "192.0.2.123",\n  "action": "publish",\n  "path": "live/event"\n}</code></pre>'
+        },
+        { 
+            name: 'JWT', 
+            description: 'Validates JSON Web Tokens issued by an external Identity Provider (IdP).',
+            complexity: 'Medium',
+            scalability: 'High',
+            useCase: 'Perfect for modern microservice architectures already using OAuth 2.0 or OIDC for authentication.',
+            details: 'MediaMTX validates the token signature against a public key (JWKS) and checks claims for permissions. It is stateless and highly secure.'
+        }
+    ];
+
+    const checklistData = [
+        { category: 'Security', item: 'Is a non-`internal` authentication method (`http` or `jwt`) configured?' },
+        { category: 'Security', item: 'Is TLS/SSL encryption enabled on all public-facing listeners?' },
+        { category: 'Configuration', item: 'Is the `mediamtx.yml` file under version control (e.g., Git)?' },
+        { category: 'Deployment', item: 'If using Docker, is `--network=host` or a TCP-only strategy used?' },
+        { category: 'Deployment', item: 'Is the server running as a managed service (e.g., systemd)?' },
+        { category: 'Monitoring', item: 'Is the Prometheus metrics endpoint enabled and being scraped?' },
+        { category: 'Reliability', item: 'Are `fallback` paths configured for critical streams?' },
+        { category: 'Reliability', item: 'Is the `fMP4` to standard MP4 recording workflow tested?' },
+    ];
+
+
+    // --- Navigation ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                });
+            }
+        });
+    }, { rootMargin: "-50% 0px -50% 0px" });
+
+    sections.forEach(section => observer.observe(section));
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = e.target.getAttribute('href');
+            document.querySelector(targetId).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+
+    // --- Chart Rendering ---
+    const renderProtocolChart = () => {
+        const ctx = document.getElementById('protocolChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['SRT', 'WebRTC', 'RTSP', 'RTMP', 'HLS', 'MPEG-TS'],
+                datasets: [{
+                    label: 'Can Publish (Ingress)',
+                    data: [1, 1, 1, 1, 1, 1],
+                    backgroundColor: 'rgba(14, 165, 233, 0.6)', // sky-500
+                    borderColor: 'rgba(14, 165, 233, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Can Read (Egress)',
+                    data: [1, 1, 1, 1, 1, 0],
+                    backgroundColor: 'rgba(20, 184, 166, 0.6)', // teal-500
+                    borderColor: 'rgba(20, 184, 166, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value === 1 ? 'Yes' : 'No';
+                            },
+                           max: 1,
+                           stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw === 1 ? 'Yes' : 'No';
+                                return label;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    };
+
+    const renderSizingChart = () => {
+        const ctx = document.getElementById('sizingChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Small Tier', 'Medium Tier', 'High-Load Tier'],
+                datasets: [
+                    {
+                        label: 'vCPU Cores',
+                        data: [2, 6, 8], // Midpoint for medium
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
+                    },
+                    {
+                        label: 'RAM (GB)',
+                        data: [2.5, 10, 24], // Midpoint for ranges
+                        backgroundColor: 'rgba(14, 165, 233, 0.6)', // sky-500
+                    },
+                    {
+                        label: 'Network (Mbps)',
+                        data: [175, 1000, 1000], // Midpoint for small, max for others
+                        backgroundColor: 'rgba(34, 211, 238, 0.6)', // cyan-400
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: 'Resource Units (higher is better)'
+                        }
+                    },
+                     y: {
+                        stacked: false
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                           label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                let value = context.raw;
+                                if (context.dataset.label === 'Network (Mbps)') {
+                                    label += value >= 1000 ? '1 Gbps+' : value + ' Mbps';
+                                } else {
+                                     label += value;
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Resource Comparison by Tier'
+                    }
+                }
+            }
+        });
+    };
+    
+    // --- Interactive Elements ---
+    const populateAuthCards = () => {
+        const container = document.getElementById('auth-cards');
+        const detailsContainer = document.getElementById('auth-details');
+        
+        container.innerHTML = authData.map((auth, index) => `
+            <div class="auth-card cursor-pointer border-2 border-transparent p-4 rounded-lg bg-slate-50 hover:bg-white hover:shadow-lg hover:border-sky-500 transition-all" data-index="${index}">
+                <h4 class="text-lg font-bold text-slate-800">${auth.name}</h4>
+                <p class="text-sm text-slate-600 mt-2">${auth.description}</p>
+                <div class="mt-4 flex justify-between text-xs">
+                    <span class="font-medium text-slate-500">Complexity: <strong class="text-slate-800">${auth.complexity}</strong></span>
+                    <span class="font-medium text-slate-500">Scalability: <strong class="text-slate-800">${auth.scalability}</strong></span>
+                </div>
+            </div>
+        `).join('');
+        
+        container.addEventListener('click', (e) => {
+            const card = e.target.closest('.auth-card');
+            if (card) {
+                document.querySelectorAll('.auth-card').forEach(c => c.classList.remove('border-sky-500', 'bg-white', 'shadow-lg'));
+                card.classList.add('border-sky-500', 'bg-white', 'shadow-lg');
+                
+                const data = authData[card.dataset.index];
+                detailsContainer.innerHTML = `
+                    <h5 class="font-bold text-slate-800">${data.name} - Ideal Use Case</h5>
+                    <p class="text-sm text-slate-600 mt-1">${data.useCase}</p>
+                    <h5 class="font-bold text-slate-800 mt-3">Implementation Notes</h5>
+                    <div class="text-sm text-slate-600 mt-1">${data.details}</div>
+                `;
+                detailsContainer.classList.remove('hidden');
+            }
+        });
+    };
+
+    const populateChecklist = () => {
+        const container = document.getElementById('checklist');
+        container.innerHTML = checklistData.map((item, index) => `
+            <label for="check-${index}" class="flex items-center p-3 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors cursor-pointer">
+                <input type="checkbox" id="check-${index}" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                <span class="ml-3 text-sm text-slate-700"><strong class="font-semibold text-sky-800">${item.category}:</strong> ${item.item}</span>
+            </label>
+        `).join('');
+    };
+
+
+    // --- Init ---
+    renderProtocolChart();
+    renderSizingChart();
+    populateAuthCards();
+    populateChecklist();
+});
+</script>
+
+</body>
+</html>
